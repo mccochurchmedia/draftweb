@@ -733,6 +733,17 @@
   footer .brand { color: var(--cream); }
   footer .foot-links { display: flex; gap: 22px; }
   footer .foot-links a:hover { color: var(--lantern-soft); }
+footer .foot-credit {
+  flex-basis: 100%;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.75);
+  text-align: center;
+}
+footer .foot-credit span {
+  color: var(--cream);
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -1307,7 +1318,7 @@
       <a href="https://www.facebook.com/share/1ESLvCYWf6/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">Facebook</a>
     </div>
     <div>© 2026 Methodist Congregational Church of Ontario</div>
-    <div style="opacity:0.7; font-size:13px; margin-top:4px;">Website by Aidan C.</div>
+    <div class="foot-credit">Website by <span>Aidan C.</span></div>
   </div>
 </footer>
 
