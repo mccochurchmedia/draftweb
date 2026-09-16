@@ -373,6 +373,36 @@
     transition: border-color 0.2s, transform 0.2s;
   }
   .btn-ghost:hover { border-color: var(--lantern); transform: translateY(-2px); }
+  .lang-toggle-btn {
+    background: rgba(232,163,61,0.18);
+    border: 2px solid var(--lantern);
+    color: var(--lantern-soft);
+    padding: 11px 24px;
+    border-radius: 999px;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 0 0 0 rgba(232,163,61,0.45);
+    animation: langPulse 2.4s ease-in-out infinite;
+    transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .lang-toggle-btn svg { width: 17px; height: 17px; flex-shrink: 0; transition: transform 0.4s; }
+  .lang-toggle-btn:hover {
+    background: var(--lantern);
+    color: var(--dusk-deep);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(232,163,61,0.35);
+    animation-play-state: paused;
+  }
+  .lang-toggle-btn:hover svg { transform: rotate(-14deg) scale(1.1); }
+  @keyframes langPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(232,163,61,0.45); }
+    60%  { box-shadow: 0 0 0 9px rgba(232,163,61,0); }
+    100% { box-shadow: 0 0 0 0 rgba(232,163,61,0); }
+  }
 
   /* ---------- Service times strip ---------- */
   .schedule-strip {
@@ -918,8 +948,8 @@
       <a href="https://www.google.com/maps/search/?api=1&query=25+Old+York+Mills+Rd+Toronto+ON" target="_blank" rel="noopener noreferrer" class="btn-primary i18n" data-en="Plan Your Visit" data-tl="Magplano ng Pagbisita">Plan Your Visit</a>
       <a href="#about" class="btn-ghost i18n" data-en="Learn Our Story" data-tl="Alamin ang Aming Kwento">Learn Our Story</a>
       <div class="lang-toggle-wrap" style="display:inline-flex; align-items:center; gap:8px; flex-wrap:wrap;">
-        <button id="langToggle" class="btn-ghost i18n" type="button" title="Switch this page between English and Tagalog" aria-label="Switch this page between English and Tagalog" data-en="Tagalog" data-tl="English" style="cursor:pointer; font-family:inherit; font-size:14px;">Tagalog</button>
-        <span class="i18n" style="font-size:12px; color:var(--lantern-soft); opacity:0.85;" data-en="Tap to read this page in Tagalog" data-tl="Pindutin para basahin ang pahinang ito sa Ingles">Tap to read this page in Tagalog</span>
+        <button id="langToggle" class="lang-toggle-btn" type="button" title="Switch this page between English and Tagalog" aria-label="Switch this page between English and Tagalog" style="cursor:pointer; font-family:inherit;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3c2.5 2.6 3.8 5.7 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.7-3.8-9s1.3-6.4 3.8-9z"></path></svg><span class="i18n" data-en="Tagalog" data-tl="English">Tagalog</span></button>
+        <span class="i18n" style="font-size:14px; font-weight:600; color:var(--cream); opacity:1;" data-en="Tap to read this page in Tagalog" data-tl="Pindutin para basahin ang pahinang ito sa Ingles">Tap to read this page in Tagalog</span>
       </div>
     </div>
   </div>
@@ -1437,8 +1467,9 @@
       <a href="https://www.facebook.com/share/1ESLvCYWf6/?mibextid=wwXIfr" target="_blank" rel="noopener noreferrer">Facebook</a>
     </div>
     <div>© 2026 Methodist Congregational Church of Ontario</div>
-    <div style="opacity:0.7; font-size:13px; margin-top:4px;">Website by Aidan C.</div>
   </div>
+  <hr style="border:none; border-top:1px solid rgba(255,255,255,0.25); width:100%; margin:16px 0 8px;">
+  <div style="text-align:center; opacity:1; font-size:15px; font-weight:600; color:var(--lantern-soft);">Created by Aidan C.</div>
 </footer>
 
 <script>
