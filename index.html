@@ -1434,7 +1434,7 @@
       <h2 class="i18n" data-en="Moments From Our Church Family" data-tl="Mga Sandali Mula sa Aming Pamilya sa Simbahan">Moments From Our Church Family</h2>
       <p class="i18n" data-en="A few favourites from our 10th anniversary celebration last year. Tap any photo to view it larger." data-tl="Ilang paborito mula sa aming ika-10 anibersaryong pagdiriwang noong nakaraang taon. Pindutin ang anumang larawan para tingnan ito nang mas malaki.">A few favourites from our 10th anniversary celebration last year. Tap any photo to view it larger.</p>
       <button type="button" id="galleryToggleBtn" class="btn-gallery" onclick="toggleGallery()" style="margin-top:16px;" aria-expanded="false" aria-controls="galleryGrid">
-        <span class="btn-label">Show Photos</span>
+        <span class="btn-label i18n" data-en="Show Photos" data-tl="Ipakita ang Mga Larawan">Show Photos</span>
         <svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
     </div>
@@ -1642,6 +1642,15 @@
     images = Array.from(grid.querySelectorAll('img')).map(img => ({ src: img.src, alt: img.alt }));
   }
 
+  // Keep the button label translatable: store both languages on the element, show the current one.
+  function setGalleryLabel(label, open) {
+    const en = open ? 'Hide Photos' : 'Show Photos';
+    const tl = open ? 'Itago ang Mga Larawan' : 'Ipakita ang Mga Larawan';
+    label.setAttribute('data-en', en);
+    label.setAttribute('data-tl', tl);
+    label.textContent = document.documentElement.lang === 'tl' ? tl : en;
+  }
+
   window.toggleGallery = function() {
     const btn = document.getElementById('galleryToggleBtn');
     const label = btn.querySelector('.btn-label');
@@ -1654,7 +1663,7 @@
         grid.classList.remove('open');
         grid.style.maxHeight = '0px';
       });
-      label.textContent = 'Show Photos';
+      setGalleryLabel(label, false);
       btn.setAttribute('aria-expanded', 'false');
     } else {
       grid.classList.add('open');
@@ -1665,7 +1674,7 @@
         // Only release the height cap if the grid is still open (it may have been closed mid-animation)
         if (grid.classList.contains('open')) grid.style.maxHeight = 'none';
       });
-      label.textContent = 'Hide Photos';
+      setGalleryLabel(label, true);
       btn.setAttribute('aria-expanded', 'true');
       grid.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
