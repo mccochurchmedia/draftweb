@@ -1759,13 +1759,25 @@
                 'Nabasag mo ang code \u2726', 'Labing-isang taon ng pagsamba, pagsasama-sama at pamilya \u2014 at may upuan ka na sa hapag. Lahat ay sa biyaya ng Diyos.'],
       mabuhay: ['Mabuhay! \u2726', 'That\u2019s the warmest word we know. There\u2019s always a seat saved for you.',
                 'Mabuhay! \u2726', 'Iyan ang pinakamainit naming salita. Laging may nakalaang upuan para sa iyo.'],
-      badge:   ['Eleven for eleven \u2726', 'Eleven taps for eleven years. Thank you for being part of the story \u2014 we\u2019re only getting started.',
-                'Labing-isa para sa labing-isa \u2726', 'Labing-isang tap para sa labing-isang taon. Salamat sa pagiging bahagi ng kuwento \u2014 nagsisimula pa lang kami.'],
-      logo:    ['Welcome home \u2726', 'You found the front door. Come in, grab a seat, and stay a while.',
-                'Maligayang pagdating sa tahanan \u2726', 'Nahanap mo ang pintuan. Pumasok ka, maupo, at manatili muna.'],
+      badge:   ['Eleven for eleven \u2726', 'You counted every year! Thank you for being part of the story \u2014 we\u2019re only getting started.',
+                'Labing-isa para sa labing-isa \u2726', 'Binilang mo ang bawat taon! Salamat sa pagiging bahagi ng kuwento \u2014 nagsisimula pa lang kami.'],
+      logo:    ['Welcome home \u2726', 'You spun us right round. Come in, grab a seat, and stay a while.',
+                'Maligayang pagdating sa tahanan \u2726', 'Pinaikot mo kami! Pumasok ka, maupo, at manatili muna.'],
       cross:   ['Found the cross \u2726', 'Wherever two or three gather, you\u2019re welcome among them.',
                 'Nahanap mo ang krus \u2726', 'Saanman magkatipon ang dalawa o tatlo, malugod kang tinatanggap.']
     };
+
+    // Tap the big "Mabuhay Kumusta!" greeting to take a little tour of Philippine languages
+    var GREETINGS = [
+      ['Naimbag nga aldaw!', 'Naimbag nga aldaw \u2726', 'That\u2019s \u201Cgood day\u201D in Ilocano \u2014 the language of our service at the end of every month.',
+                             'Naimbag nga aldaw \u2726', 'Iyan ang \u201Cmagandang araw\u201D sa Ilocano \u2014 ang wika ng aming serbisyo tuwing katapusan ng buwan.'],
+      ['Napia nga algaw!',   'Napia nga algaw \u2726',   'That\u2019s \u201Cgood day\u201D in Itawis, spoken in the Cagayan Valley. Keep tapping \u2014 there\u2019s more.',
+                             'Napia nga algaw \u2726',   'Iyan ang \u201Cmagandang araw\u201D sa Itawis, na sinasalita sa Cagayan Valley. Ituloy ang pagpindot \u2014 may susunod pa.'],
+      ['Magandang araw!',    'Magandang araw \u2726',    'Tagalog this time. One more tap takes you home.',
+                             'Magandang araw \u2726',    'Tagalog naman ngayon. Isang pindot pa at uuwi ka na.'],
+      [null,                 'Mabuhay Kumusta \u2726',   'Back where we started \u2014 and that\u2019s exactly where you\u2019re welcome.',
+                             'Mabuhay Kumusta \u2726',   'Balik sa simula \u2014 at doon ka eksaktong malugod na tinatanggap.']
+    ];
 
     var css = document.createElement('style');
     css.textContent =
@@ -1777,45 +1789,88 @@
       '.egg-toast.show{opacity:1;transform:translate(-50%,0) scale(1);}' +
       '.egg-title{font-family:"Fraunces",serif;font-style:italic;font-weight:700;font-size:22px;line-height:1.2;color:#F0C578;margin-bottom:8px;}' +
       '.egg-body{font-family:"Work Sans",sans-serif;font-size:15px;line-height:1.55;color:#FBF3E4;}' +
-      '.anniv-badge{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;transition:transform .15s ease;}' +
-      '.anniv-badge.egg-bump{transform:scale(1.07);}' +
-      '.hero-logo{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}' +
-      '.verse-banner .cross-divider{box-sizing:content-box;padding:12px;margin:-12px auto 8px;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}' +
+      '.anniv-badge,.hero-logo,.hero-inner h1>span:first-child,.verse-banner .cross-divider{-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent;}' +
+      '.hero-logo{-webkit-touch-callout:none;}' +
+      '.verse-banner .cross-divider{box-sizing:content-box;padding:12px;margin:-12px auto 8px;transition:filter .3s ease;}' +
       '@media (prefers-reduced-motion: reduce){.egg-toast{transition:opacity .2s;transform:translate(-50%,0);}}';
     document.head.appendChild(css);
 
-    var busy = false;
+    function motionOK() {
+      return !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) &&
+             typeof Element.prototype.animate === 'function';
+    }
+    function play(el, frames, opts) { if (el && motionOK()) { try { el.animate(frames, opts); } catch (e) {} } }
     function inTagalog() {
       var s = document.querySelector('#langToggle .i18n');
       return !!s && s.textContent.trim() === 'English';
     }
-    function celebrate(key) {
-      if (busy) return;
-      busy = true;
-      var m = MESSAGES[key], o = inTagalog() ? 2 : 0;
 
+    // A soft three-note bell, built in the browser (no audio files). Quiet and short.
+    var actx = null;
+    function chime() {
+      try {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return;
+        if (!actx) actx = new AC();
+        if (actx.state === 'suspended') actx.resume();
+        [659.25, 783.99, 1046.5].forEach(function (f, i) {
+          var t0 = actx.currentTime + i * 0.17;
+          [[1, 1], [2.01, 0.35], [3.0, 0.15]].forEach(function (p) {
+            var o = actx.createOscillator(), g = actx.createGain();
+            o.type = 'sine';
+            o.frequency.value = f * p[0];
+            g.gain.setValueAtTime(0.0001, t0);
+            g.gain.exponentialRampToValueAtTime(0.045 * p[1], t0 + 0.012);
+            g.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.5);
+            o.connect(g); g.connect(actx.destination);
+            o.start(t0); o.stop(t0 + 1.6);
+          });
+        });
+      } catch (e) {}
+    }
+
+    // Message card (a new one replaces any card already showing)
+    var toastEl = null, tHide = null, tGone = null;
+    function showToast(title, body) {
+      clearTimeout(tHide); clearTimeout(tGone);
+      if (toastEl && toastEl.parentNode) toastEl.parentNode.removeChild(toastEl);
       var toast = document.createElement('div');
       toast.className = 'egg-toast';
       toast.setAttribute('role', 'status');
-      var title = document.createElement('div');
-      title.className = 'egg-title';
-      title.textContent = m[o];
-      var body = document.createElement('div');
-      body.className = 'egg-body';
-      body.textContent = m[o + 1];
-      toast.appendChild(title);
-      toast.appendChild(body);
+      var t = document.createElement('div'); t.className = 'egg-title'; t.textContent = title;
+      var b = document.createElement('div'); b.className = 'egg-body';  b.textContent = body;
+      toast.appendChild(t); toast.appendChild(b);
       document.body.appendChild(toast);
+      toastEl = toast;
       requestAnimationFrame(function () { requestAnimationFrame(function () { toast.classList.add('show'); }); });
-
-      setTimeout(function () { toast.classList.remove('show'); }, 6000);
-      setTimeout(function () {
-        if (toast.parentNode) toast.parentNode.removeChild(toast);
-        busy = false;
-      }, 6700);
+      tHide = setTimeout(function () { toast.classList.remove('show'); }, 6000);
+      tGone = setTimeout(function () { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 6700);
+    }
+    function celebrate(key) {
+      var m = MESSAGES[key], o = inTagalog() ? 2 : 0;
+      showToast(m[o], m[o + 1]);
+      chime();
     }
 
-    // 1) Konami code, and 2) typing "mabuhay" anywhere on the page
+    // ---- Keyboard eggs (desktop) ----
+    // Konami code: the headings on screen do a happy little wave
+    function headingWave() {
+      var hs = Array.prototype.filter.call(document.querySelectorAll('h1, h2'), function (h) {
+        var r = h.getBoundingClientRect();
+        return r.bottom > 0 && r.top < window.innerHeight;
+      }).slice(0, 8);
+      hs.forEach(function (h, i) {
+        play(h, [{ transform: 'translateY(0)' }, { transform: 'translateY(-12px)' }, { transform: 'translateY(0)' }],
+             { duration: 650, delay: i * 140, easing: 'ease-in-out' });
+      });
+    }
+    // Typing "mabuhay": the main headline does a happy shimmy
+    function shimmy() {
+      play(document.querySelector('.hero-inner h1'),
+           [{ transform: 'rotate(0)' }, { transform: 'rotate(-1.6deg)' }, { transform: 'rotate(1.6deg)' }, { transform: 'rotate(-1deg)' }, { transform: 'rotate(0)' }],
+           { duration: 800, easing: 'ease-in-out' });
+    }
+
     var konami = ['ArrowUp','ArrowUp','ArrowDown','ArrowDown','ArrowLeft','ArrowRight','ArrowLeft','ArrowRight','b','a'];
     var kPos = 0, typed = '';
     document.addEventListener('keydown', function (e) {
@@ -1825,35 +1880,100 @@
 
       if (k === konami[kPos]) {
         kPos++;
-        if (kPos === konami.length) { kPos = 0; celebrate('konami'); }
+        if (kPos === konami.length) { kPos = 0; headingWave(); celebrate('konami'); }
       } else {
         kPos = (k === konami[0]) ? 1 : 0;
       }
 
       if (e.key.length === 1) {
         typed = (typed + k).slice(-7);
-        if (typed === 'mabuhay') { typed = ''; celebrate('mabuhay'); }
+        if (typed === 'mabuhay') { typed = ''; shimmy(); celebrate('mabuhay'); }
       }
     });
 
-    // Phone-friendly: tap a few things a few times, quickly (each tap within ~2.5s of the last)
-    function tapEgg(el, needed, key, bump) {
-      if (!el) return;
-      var taps = 0, timer = null;
-      el.addEventListener('click', function () {
+    // ---- Tap eggs (phone-friendly). Each tap must come within ~2.5s of the last. ----
+    function ordinal(n) { var s = ['th', 'st', 'nd', 'rd'], v = n % 100; return s[(v - 20) % 10] || s[v] || s[0]; }
+
+    // 1) The "11th" badge counts up the years, 1st, 2nd, 3rd ... and spins on the 11th
+    (function () {
+      var badge = document.querySelector('.anniv-badge');
+      var num = badge && badge.querySelector('.num');
+      if (!badge || !num) return;
+      var original = num.innerHTML, taps = 0, timer = null;
+      function reset() { taps = 0; num.innerHTML = original; }
+      badge.addEventListener('click', function () {
         taps++;
-        if (bump) {
-          el.classList.add('egg-bump');
-          setTimeout(function () { el.classList.remove('egg-bump'); }, 140);
+        clearTimeout(timer);
+        num.innerHTML = taps + '<sup>' + ordinal(taps) + '</sup>';
+        if (taps >= 11) {
+          play(badge, [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(360deg) scale(1.12)' }, { transform: 'rotate(720deg) scale(1)' }],
+               { duration: 1100, easing: 'ease-in-out' });
+          celebrate('badge');
+          timer = setTimeout(reset, 1800);
+          taps = 0;
+        } else {
+          play(badge, [{ transform: 'scale(1)' }, { transform: 'scale(1.1)' }, { transform: 'scale(1)' }], { duration: 200 });
+          timer = setTimeout(reset, 2500);
         }
+      });
+    })();
+
+    // 2) The big logo wiggles on each tap and spins on the 5th
+    (function () {
+      var logo = document.querySelector('.hero-logo');
+      if (!logo) return;
+      var taps = 0, timer = null;
+      logo.addEventListener('click', function () {
+        taps++;
         clearTimeout(timer);
         timer = setTimeout(function () { taps = 0; }, 2500);
-        if (taps >= needed) { taps = 0; celebrate(key); }
+        if (taps >= 5) {
+          taps = 0;
+          play(logo, [{ transform: 'rotate(0) scale(1)' }, { transform: 'rotate(360deg) scale(1.25)' }, { transform: 'rotate(720deg) scale(1)' }],
+               { duration: 1100, easing: 'ease-in-out' });
+          celebrate('logo');
+        } else {
+          play(logo, [{ transform: 'rotate(0)' }, { transform: 'rotate(-10deg)' }, { transform: 'rotate(8deg)' }, { transform: 'rotate(-4deg)' }, { transform: 'rotate(0)' }], { duration: 380 });
+        }
       });
-    }
-    tapEgg(document.querySelector('.anniv-badge'), 11, 'badge', true);        // the "11th" badge, 11 taps
-    tapEgg(document.querySelector('.hero-logo'), 5, 'logo', false);           // the big logo at the top, 5 taps
-    tapEgg(document.querySelector('.verse-banner .cross-divider'), 3, 'cross', false); // the little cross, 3 taps
+    })();
+
+    // 3) The little cross glows brighter with each tap, then bursts on the 3rd
+    (function () {
+      var cross = document.querySelector('.verse-banner .cross-divider');
+      if (!cross) return;
+      var taps = 0, timer = null;
+      function clearGlow() { cross.style.filter = ''; }
+      cross.addEventListener('click', function () {
+        taps++;
+        clearTimeout(timer);
+        cross.style.filter = 'drop-shadow(0 0 ' + (taps * 9) + 'px rgba(240,197,120,0.95))';
+        if (taps >= 3) {
+          taps = 0;
+          play(cross, [{ transform: 'scale(1)' }, { transform: 'scale(1.7)' }, { transform: 'scale(1)' }], { duration: 700, easing: 'ease-out' });
+          celebrate('cross');
+          timer = setTimeout(clearGlow, 2500);
+        } else {
+          timer = setTimeout(function () { taps = 0; clearGlow(); }, 2500);
+        }
+      });
+    })();
+
+    // 4) Tap the big greeting to tour the Philippine languages (Ilocano, Itawis, Tagalog, then home)
+    (function () {
+      var greet = document.querySelector('.hero-inner h1 > span:first-child');
+      if (!greet) return;
+      var original = greet.textContent, idx = 0, timer = null;
+      greet.addEventListener('click', function () {
+        var g = GREETINGS[idx % GREETINGS.length], o = inTagalog() ? 3 : 1;
+        greet.textContent = g[0] === null ? original : g[0];
+        play(greet, [{ transform: 'translateY(0)' }, { transform: 'translateY(-8px)' }, { transform: 'translateY(0)' }], { duration: 350 });
+        showToast(g[o], g[o + 1]);
+        idx++;
+        clearTimeout(timer);
+        timer = setTimeout(function () { greet.textContent = original; idx = 0; }, 12000);
+      });
+    })();
   })();
 </script>
 <script defer src="/_vercel/insights/script.js"></script>
